@@ -5,14 +5,14 @@ VisualStudioVersion = 17.3.32811.315
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApi", "WebApi\WebApi.csproj", "{8298E762-1EEE-4340-8099-977F9D2A62CE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApp", "WebApp\WebApp.csproj", "{4356FC62-1192-4627-BFDE-91C57C91C92A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApp", "WebApp\WebApp.csproj", "{4356FC62-1192-4627-BFDE-91C57C91C92A}"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{06EAEF45-C689-4163-B815-A4EDA88D0671}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{21936305-E66B-4298-A87B-10E68339A26C}"
 	ProjectSection(SolutionItems) = preProject
-		..\deploy-webapi.yml = ..\deploy-webapi.yml
-		..\deploy-webapp.yml = ..\deploy-webapp.yml
+		deploy-webapi.yml = deploy-webapi.yml
+		deploy-webapp.yml = deploy-webapp.yml
 	EndProjectSection
 EndProject
 Global
