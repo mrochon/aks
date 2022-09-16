@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: webapi
-          image: mracregistry.azurecr.io/webapi:v2
+          image: mracregistry.azurecr.io/webapi:V1
           imagePullPolicy: Always
           ports:
             - containerPort: 80

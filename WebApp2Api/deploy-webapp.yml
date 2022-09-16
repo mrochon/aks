@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: webapp
-          image: mracregistry.azurecr.io/webapp:v2
+          image: mracregistry.azurecr.io/webapp:V1
           imagePullPolicy: Always
           ports:
             - containerPort: 80
