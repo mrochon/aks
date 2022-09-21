@@ -1,4 +1,4 @@
-name: WebApi-update
+name: Update-WebApp
 "on":
     push:
         branches:
@@ -9,9 +9,9 @@ env:
     AZURE_CONTAINER_REGISTRY: mracregistry
     CLUSTER_NAME: AKSCluster
     CLUSTER_RESOURCE_GROUP: aks
-    CONTAINER_NAME: webapi
+    CONTAINER_NAME: webapp
     DEPLOYMENT_MANIFEST_PATH: |
-        ./WebApp2Api/docker-compose.yml
+        ./WebApp2Api/deploy-webapp.yml
 jobs:
     buildImage:
         permissions:
@@ -27,7 +27,7 @@ jobs:
                 subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
                 tenant-id: ${{ secrets.AZURE_TENANT_ID }}
             - name: Build and push image to ACR
-              run: az acr build --image ${{ env.CONTAINER_NAME }}:${{ github.sha }} --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.ACR_RESOURCE_GROUP }} -f ./WebApp2Api/deploy-webapi.yml ./
+              run: az acr build --image ${{ env.CONTAINER_NAME }}:${{ github.sha }} --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.ACR_RESOURCE_GROUP }} -f ./WebApp2Api/WebApp/Dockerfile ./WebApp2Api
     deploy:
         permissions:
             actions: read
