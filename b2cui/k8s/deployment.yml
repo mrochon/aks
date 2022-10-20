@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: b2cui-deployment
+  labels:
+    app: web
+spec:
+  selector:
+    matchLabels:
+      app: web
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      volumes:
+      - name: www
+        hostPath:
+          # directory location on host
+          #path: /c/users/mrochon/ui
+          # in Docker K8s: https://stackoverflow.com/questions/71018631/kubernetes-on-docker-for-windows-persistent-volume-with-hostpath-gives-operatio
+          path: /run/desktop/mnt/host/c/temp/aks/b2cui/ui/         
+          # this field is optional
+          type: Directory    
+      containers:
+      - name: nginx
+        image: nginx:latest
+        #ports:
+        #- containerPort: 80
+        volumeMounts:
+        - mountPath: /usr/share/nginx/html/ui
+          name: www            
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: b2cui-entrypoint
+  namespace: default
+spec:
+  type: NodePort
+  selector:
+    app: web
+  ports:
+  - port: 80
+    targetPort: 80
+    nodePort: 30001
