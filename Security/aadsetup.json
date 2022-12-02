@@ -1,0 +1,13 @@
+{
+    "objects": [
+        {
+            "kind": "Application",
+            "name": "WebApp",
+            "replyUrls": [
+                {
+                    "type": "web"
+                }
+            ]
+        }
+    ]
+}
