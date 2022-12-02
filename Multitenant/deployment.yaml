@@ -1,27 +1,34 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: webapi
+  name: b2cmt
   labels:
-    app: mtrest
+    app: api
 spec:
   replicas: 1
   selector:
     matchLabels:
-      service: webapi
+      service: b2cmt
   template:
     metadata:
       labels:
-        app: mtrest
-        service: webapi
+        app: api
+        service: b2cmt
     spec:
       containers:
-        - name: webapi
+        - name: b2cmt
           image: localhost:5000/restfunctions:1.0.0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 443
               protocol: TCP
+          volumeMounts:
+          - name: appsettings-volume
+            mountPath: /app/Settings
           env:
             - name: ASPNETCORE_URLS
               value: http://+:443
+      volumes:
+      - name: appsettings-volume
+        configMap:
+          name: apisettings
