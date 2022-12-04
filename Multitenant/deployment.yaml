@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: b2cmt
-          image: localhost:5000/restfunctions:1.0.0
+          image: localhost:5000/mtapi:1.0.0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 443

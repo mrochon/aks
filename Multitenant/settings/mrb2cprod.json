@@ -1,10 +1,4 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: apisettings
-data:
-  appsettings.json: |-
-    {
+{
     "AuthCert": {
         "thumbprint": "F5DFCF2EA471568C16CCF2486500DF38A1959B36",
         "issuer": "CN=RESTClientCert.mrochonb2cprod.onmicrosoft.com",
@@ -26,5 +20,5 @@ data:
         "Policy": "B2C_1A_MTInvitation",
         "ValidityHours": 24,
         "IncludeDomainHints": true
-      } 
-    }
+      }    
+}
