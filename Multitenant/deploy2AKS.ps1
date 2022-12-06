@@ -33,6 +33,7 @@ $USER_ASSIGNED_CLIENT_ID="$(az identity show `
 
 $AKS_OIDC_ISSUER="$(az aks show -n $AKS_CLUSTER_NAME -g $RG `
     --query "oidcIssuerProfile.issuerUrl" -otsv)"
+$METADATA_URL = "$(AKS_OIDC_ISSUER).well-known/openid-configuration"
 
 az aks get-credentials -n $AKS_CLUSTER_NAME -g $RG
 
