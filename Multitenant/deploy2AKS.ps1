@@ -33,11 +33,14 @@ $USER_ASSIGNED_CLIENT_ID="$(az identity show `
 
 $AKS_OIDC_ISSUER="$(az aks show -n $AKS_CLUSTER_NAME -g $RG `
     --query "oidcIssuerProfile.issuerUrl" -otsv)"
-$METADATA_URL = "$(AKS_OIDC_ISSUER).well-known/openid-configuration"
+$METADATA_URL = "$($AKS_OIDC_ISSUER).well-known/openid-configuration"
+Write-Host "OIDC Metadata: $($METADATA_URL)"
 
 az aks get-credentials -n $AKS_CLUSTER_NAME -g $RG
 
 # fix up and ..
+# ----------
+
 kubectl apply -f serviceaccount.yaml
 
 az identity federated-credential create --name federatedIdentityName `
