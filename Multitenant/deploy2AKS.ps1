@@ -6,6 +6,9 @@ $RG = "$($PROJ)aks-rg"
 $IDENTITY = "$($PROJ)-api-identity"
 $AKS_CLUSTER_NAME = "$($PROJ)-aks"
 $ACR_SERVER = "mrochonacr.azurecr.io"
+$SERVICE_ACCOUNT_NAME = "graph-client.com"
+$SERVICE_ACCOUNT_NAMESPACE = "default"
+$FEDERATED_IDENTITY_NAME = "b2cmt-aks-api"
 
 docker tag restfunctions:latest $ACR_SERVER/b2cmtapi:v1
 az acr login --name $ACR_SERVER
@@ -39,12 +42,21 @@ Write-Host "OIDC Metadata: $($METADATA_URL)"
 az aks get-credentials -n $AKS_CLUSTER_NAME -g $RG
 
 # fix up and ..
+
+"apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations:
+    azure.workload.identity/client-id: $($USER_ASSIGNED_CLIENT_ID)
+  labels:
+    azure.workload.identity/use: ""true""
+  name: $($SERVICE_ACCOUNT_NAME)
+  namespace: $($SERVICE_ACCOUNT_NAMESPACE)" | kubectl apply -f -
+
 # ----------
 
-kubectl apply -f serviceaccount.yaml
-
-az identity federated-credential create --name federatedIdentityName `
-    --identity-name userAssignedIdentityName --resource-group resourceGroupName `
+az identity federated-credential create --name $FEDERATED_IDENTITY_NAME `
+    --identity-name $IDENTITY --resource-group $RG `
     --issuer ${AKS_OIDC_ISSUER} `
     --subject system:serviceaccount:${SERVICE_ACCOUNT_NAMESPACE}:${SERVICE_ACCOUNT_NAME}
 
