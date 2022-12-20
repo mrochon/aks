@@ -1,10 +1,11 @@
+# https://blog.identitydigest.com/azuread-federate-k8s/
+
 $TENANT = 'beitmerari.com'
 $SUBSCRIPTION_ID = '56815821-7deb-4dce-8c2a-374756037a1e'
 $LOCATION = "WESTUS3"
-$PROJ = "b2cmt"
-$RG = "$($PROJ)aks-rg"
-$IDENTITY = "$($PROJ)-api-identity"
-$AKS_CLUSTER_NAME = "$($PROJ)-aks"
+$PROJ = "akswi"
+$RG = "$($PROJ)-rg"
+$CLUSTER_NAME = "$($PROJ)-aks"
 $ACR_SERVER = "mrochonacr.azurecr.io"
 $SERVICE_ACCOUNT_NAME = "graph-client.com"
 $SERVICE_ACCOUNT_NAMESPACE = "default"
@@ -17,7 +18,7 @@ docker push $ACR_SERVER/b2cmtapi:v1
 az login --tenant $TENANT
 az account set --subscription $SUBSCRIPTION_ID
 
-az extension add --name aks-preview
+# az extension add --name aks-preview
 az extension update --name aks-preview
 az feature register --namespace "Microsoft.ContainerService" --name "EnableWorkloadIdentityPreview"
 # above can take 10-15 mins
@@ -25,22 +26,19 @@ az feature show --namespace "Microsoft.ContainerService" --name "EnableWorkloadI
 az provider register --namespace Microsoft.ContainerService
 
 az group create --name $RG --location $LOCATION
-az aks create -g $RG -n $AKS_CLUSTER_NAME --node-count 1 --enable-oidc-issuer --enable-workload-identity --generate-ssh-keys
+az aks create -g $RG -n $CLUSTER_NAME --node-count 1 --enable-oidc-issuer --location "${LOCATION}"
 
-az identity create --name $IDENTITY --resource-group $RG `
-    --location $LOCATION --subscription $SUBSCRIPTION_ID
-
-$USER_ASSIGNED_CLIENT_ID="$(az identity show `
-    --resource-group $RG --name $IDENTITY --query 'clientId' -otsv)"
-# Give AAD permissions to the client
-
-$AKS_OIDC_ISSUER="$(az aks show -n $AKS_CLUSTER_NAME -g $RG `
+$AKS_OIDC_ISSUER="$(az aks show -n $CLUSTER_NAME -g $RG `
     --query "oidcIssuerProfile.issuerUrl" -otsv)"
 $METADATA_URL = "$($AKS_OIDC_ISSUER).well-known/openid-configuration"
 Write-Host "OIDC Metadata: $($METADATA_URL)"
+az aks show --subscription $SUBSCRIPTION_ID `
+         -g $RG --name "${CLUSTER_NAME}" `
+         --query 'oidcIssuerProfile.issuerUrl' -otsv
 
-az aks get-credentials -n $AKS_CLUSTER_NAME -g $RG
+az aks get-credentials -n $CLUSTER_NAME -g $RG
 
+# https://kubernetes.io/docs/concepts/storage/projected-volumes/ - to get token projection
 # fix up and ..
 
 "apiVersion: v1
@@ -62,3 +60,7 @@ az identity federated-credential create --name $FEDERATED_IDENTITY_NAME `
 
 
 # https://blog.devgenius.io/getting-started-with-workload-identity-in-aks-an-end-to-end-guide-547be742b327
+
+kubectl create token $SERVICE_ACCOUNT_NAME --V 3
+
+# https://stackoverflow.com/questions/74789661/how-do-i-map-a-kubectl-create-token-to-a-callable-api/74789933#74789933

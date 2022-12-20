@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      sample: api1  
+  template:
+    metadata:
+      name: api-type
+      labels:
+        sample: api1
+    spec:
+      nodeSelector:
+        kubernetes.io/os: linux    
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        volumeMounts:
+        - name: token-vol
+          mountPath: "/service-account"
+          readOnly: true
+      serviceAccountName: default
+      volumes:
+      - name: token-vol
+        projected:
+          sources:
+          - serviceAccountToken:
+              audience: api
+              expirationSeconds: 3600
+              path: token

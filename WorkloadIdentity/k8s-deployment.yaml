@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-client
+  labels:
+    app: api-client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service: webapp
+  template:
+    metadata:
+      labels:
+        app: api-client
+        service: webapp
+    spec:
+      containers:
+        - name: api-client
+          image: mrochonacr.azurecr.io/webclientapp:v1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              protocol: TCP
+          env:
+            - name: ASPNETCORE_URLS
+              value: http://+:80
+          volumeMounts:
+          - name: token-vol
+            mountPath: "/service-account"
+            readOnly: true
+      serviceAccountName: default
+      volumes:
+      - name: token-vol
+        projected:
+          sources:
+          - serviceAccountToken:
+              audience: api
+              expirationSeconds: 3600
+              path: token
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webapp
+  labels:
+    app: api-client
+    service: webapp
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 4080
+      targetPort: 80
+      protocol: TCP
+  selector:
+    service: webapp
