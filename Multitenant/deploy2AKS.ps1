@@ -58,6 +58,12 @@ az identity federated-credential create --name $FEDERATED_IDENTITY_NAME `
     --issuer ${AKS_OIDC_ISSUER} `
     --subject system:serviceaccount:${SERVICE_ACCOUNT_NAMESPACE}:${SERVICE_ACCOUNT_NAME}
 
+kubectl create token $SERVICE_ACCOUNT_NAME --audience @( "api://AzureADTokenExchange")
+# 
+# 1. Register an app in AAD and give it whatever API permissions are needed
+# 2. Use the above token with client creds to exchange it for an API token: https://learn.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow#third-case-access-token-request-with-a-federated-credential
+# ---------------------------------------------------------------------------------------
+
 
 # https://blog.devgenius.io/getting-started-with-workload-identity-in-aks-an-end-to-end-guide-547be742b327
 
