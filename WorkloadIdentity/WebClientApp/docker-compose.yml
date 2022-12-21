@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  webclientapp:
+    image: ${DOCKER_REGISTRY-}webclientapp
+    build:
+      context: .
+      dockerfile: WebClientApp/Dockerfile

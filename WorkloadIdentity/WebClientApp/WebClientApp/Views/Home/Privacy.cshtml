@@ -1,0 +1,12 @@
+﻿@model IEnumerable<string>
+@{
+    ViewData["Title"] = "Privacy Policy";
+}
+<h1>@ViewData["Title"]</h1>
+
+<ul>
+    @foreach (var line in Model)
+    {
+        <li>@line</li>
+    }
+</ul>
