@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: settings
+  namespace: default
+data:
+  app.properties: |
+    tenant: "beitmerari.com"
+    clientId: "6f377fa5-9da4-47bc-8fca-090b4a361870"
