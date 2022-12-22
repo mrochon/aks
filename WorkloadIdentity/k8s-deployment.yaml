@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
         - name: api-client
-          image: mrochonacr.azurecr.io/webclientapp:v1
+          image: mrochonacr.azurecr.io/webclientapp:v2
           imagePullPolicy: Always
           ports:
             - containerPort: 80
@@ -33,8 +33,10 @@ spec:
               value: http://+:80
           volumeMounts:
           - name: token-vol
-            mountPath: "/service-account"
+            mountPath: /service-account
             readOnly: true
+          - name: appsettings-volume
+            mountPath: /app/settings            
       imagePullSecrets:
         - name: acr-secret         
       serviceAccountName: client.app1
@@ -46,6 +48,9 @@ spec:
               audience: "api://AzureADTokenExchange"
               expirationSeconds: 3600
               path: token
+      - name: appsettings-volume
+        configMap:
+          name: appsettings
 ---
 apiVersion: v1
 kind: Service

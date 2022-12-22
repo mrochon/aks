@@ -17,7 +17,7 @@ spec:
         kubernetes.io/os: linux    
       containers:
       - name: nginx
-        image: nginx:latest
+        image: webclientapp:latest
         ports:
         - containerPort: 80
           protocol: TCP
@@ -25,6 +25,8 @@ spec:
         - name: token-vol
           mountPath: "/service-account"
           readOnly: true
+        - name: appsettings-volume
+          mountPath: /app/settings               
       serviceAccountName: default
       volumes:
       - name: token-vol
@@ -34,3 +36,6 @@ spec:
               audience: api
               expirationSeconds: 3600
               path: token
+      - name: appsettings-volume
+        configMap:
+          name: appsettings              

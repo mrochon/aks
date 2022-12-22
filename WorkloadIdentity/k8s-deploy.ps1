@@ -21,9 +21,9 @@ az feature show --namespace "Microsoft.ContainerService" --name "EnableWorkloadI
 az provider register --namespace Microsoft.ContainerService
 
 # Push a new docker image
-docker tag webclientapp:latest $ACR/webclientapp:v1
-az acr login --name $ACR  --expose-token
-docker push $ACR/webclientapp:v1
+az acr login --name $ACR 
+docker tag webclientapp:latest $ACR/webclientapp:v2
+docker push $ACR/webclientapp:v2
 
 # login to Azure
 az login --tenant $TENANT
@@ -35,10 +35,10 @@ az aks create -g $RG -n $CLUSTER_NAME --node-count 1 --enable-oidc-issuer --loca
 az aks get-credentials --resource-group $RG --name $CLUSTER_NAME
 
 # Get username/secret from Azure ACR portal Access Keys menu. Needed because of https://github.com/Azure/AKS/issues/1517, using preview
-$SECRET_NAME = "acr_secret"
-$ACR_PWD = '...'
-kubectl create secret docker-registry $SECRET_NAME --namespace default --docker-server=mrochonacr.azurecr.io --docker-username=mrochonacr --docker-password=$ACR_PWD
+
+kubectl apply -f configMap.yaml
 kubectl apply -f .\k8s-deployment.yaml
+kubectl get pods
 kubectl get services
 # Go to EXTERNAL-IP:PORTS e.g. http://20.125.85.97:4080/
 
@@ -66,5 +66,14 @@ $spStr = [string]::Concat((az ad sp create --id ($app.appId)))
 # https://blog.devgenius.io/getting-started-with-workload-identity-in-aks-an-end-to-end-guide-547be742b327
 # https://stackoverflow.com/questions/74789661/how-do-i-map-a-kubectl-create-token-to-a-callable-api/74789933#74789933
 
-$SERVICE_ACCOUNT_NAME = "client.api1"
-(Get-Content .\test.yaml -Raw) | Write-Host
+$IMAGE = "$($ACR)/webclientapp:v1"
+$SERVICE_ACCOUNT = "client.app1"
+
+kubectl apply -f .\configMap.yaml
+$yaml = $ExecutionContext.InvokeCommand.ExpandString((Get-Content .\serviceaccount.yaml | Out-String))
+$yaml | kubectl apply -f -
+
+kubectl apply -f k8s-deployment.yaml
+
+$yaml = $ExecutionContext.InvokeCommand.ExpandString((Get-Content .\deployment.yaml | Out-String))
+$yaml | kubectl apply -f -

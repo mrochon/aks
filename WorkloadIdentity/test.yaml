@@ -1,10 +1,46 @@
-apiVersion: v1
-kind: ServiceAccount
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  annotations:
-    azure.workload.identity/client-id: xyz
+  name: api-client
   labels:
-    azure.workload.identity/use: "true"
-  name: $SERVICE_ACCOUNT_NAME
-    name: $($SERVICE_ACCOUNT_NAME)
-  namespace: default
+    app: api-client  
+spec:
+  replicas: 1    
+  selector:
+    matchLabels:
+      service: webapp 
+  template:
+    metadata:
+      labels:
+        app: api-client
+        service: webapp        
+    spec:
+      containers:
+        - name: api-client
+          image: localhost:5000/webclientapp:v1
+          imagePullPolicy: Never          
+          ports:
+            - containerPort: 80
+              protocol: TCP
+          env:
+            - name: ASPNETCORE_URLS
+              value: http://+:80
+          volumeMounts:
+          - name: token-vol
+            mountPath: "/service-account"
+            readOnly: true
+          - name: appsettings-volume
+            mountPath: /app/settings                
+      serviceAccountName: client.app1
+      volumes:
+      - name: token-vol
+        projected:
+          sources:
+          - serviceAccountToken:
+              audience: "api://AzureADTokenExchange"
+              expirationSeconds: 3600
+              path: token
+      - name: appsettings-volume
+        configMap:
+          name: appsettings              
+

@@ -1,5 +1,12 @@
+using Microsoft.Identity.Client;
+
 var builder = WebApplication.CreateBuilder(args);
 
+if (File.Exists("/app/settings/appSettings.json"))
+    builder.Configuration.AddJsonFile("/app/settings/appSettings.json");
+
+builder.Services.AddOptions<ConfidentialClientApplicationOptions>()
+    .Bind(builder.Configuration.GetSection("AzureAd"));
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
