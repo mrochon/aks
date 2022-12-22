@@ -1,4 +1,4 @@
-# aks
+# My AKS doodles
 
 ## K8S APIs
 [K8S swagger dynamic - not working](https://b2cmt-aks-b2cmtaks-rg-568158-5ba957cb.hcp.westus3.azmk8s.io/openapi/v2). Needs an auth token. Which?
