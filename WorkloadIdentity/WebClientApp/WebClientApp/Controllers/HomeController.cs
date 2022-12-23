@@ -11,24 +11,14 @@ namespace WebClientApp.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly ConfidentialClientApplicationOptions _msalConfiguration;
-        //private readonly IOptions<ConfidentialClientApplicationOptions> _msalConfiguration;
+        private readonly IOptions<ConfidentialClientApplicationOptions> _msalConfiguration;
         private bool _confIsNull;
 
         public HomeController(ILogger<HomeController> logger, IOptions<ConfidentialClientApplicationOptions> msal)
         {
             _logger = logger;
-            _confIsNull = (msal == null) || (msal.Value == null);
-            if (_confIsNull)
-            {
-                _msalConfiguration = new ConfidentialClientApplicationOptions
-                {
-                    Instance = "https://login.microsoftonline.com",
-                    ClientId = "6f377fa5-9da4-47bc-8fca-090b4a361870",
-                    TenantId = "beitmerari.com"
-                };
-            } else
-                _msalConfiguration = msal!.Value!;
+            _msalConfiguration = msal;
+            _logger.LogInformation($"AAD Client Configuration is available: {(msal != null) && (msal.Value != null)}");
         }
 
         public IActionResult Index()
@@ -44,18 +34,15 @@ namespace WebClientApp.Controllers
             output.Add("Starting");
             try
             {
-                output.Add($"Configuration was present: {_confIsNull}");
-                _logger.LogInformation("Looking for k8s token");
                 output.Add("Looking for k8s token");
-
-                output.Add($"ClientId={_msalConfiguration.ClientId}");
+                output.Add($"ClientId={_msalConfiguration.Value.ClientId}");
                 string k8sToken = String.Empty;
                 try
                 {
                     using (var sr = new StreamReader("/service-account/token"))
                     {
                         k8sToken = await sr.ReadToEndAsync();
-                        _logger.LogInformation($"k8s token: {k8sToken}");
+                        _logger.LogInformation($"k8s token acquired");
                         output.Add($"k8s token: {k8sToken}");
                     }
                 }
@@ -69,7 +56,7 @@ namespace WebClientApp.Controllers
                     _logger.LogInformation("Creating msal client");
                     output.Add("Creating msal client");
                     var msal = ConfidentialClientApplicationBuilder
-                        .CreateWithApplicationOptions(_msalConfiguration)
+                        .CreateWithApplicationOptions(_msalConfiguration.Value)
                         .WithClientAssertion(k8sToken)
                         .Build();
 
@@ -78,13 +65,11 @@ namespace WebClientApp.Controllers
                         _logger.LogInformation("Acquiring token");
                         output.Add("Acquiring token");
                         var tokens = await msal.AcquireTokenForClient(new string[] { "https://graph.microsoft.com/.default" }).ExecuteAsync();
-                        _logger.LogInformation(tokens.AccessToken);
+                        _logger.LogInformation("AAD token acquired");
                         output.Add(tokens.AccessToken);
                     }
                     catch (MsalServiceException ex)
                     {
-                        //_logger.LogError(ex.Message);
-                        //output.Add(ex.Message);
                         var err = JsonNode.Parse(ex.ResponseBody);
                         _logger.LogError((string)err!["error_description"]!);
                         output.Add((string)err!["error_description"]!);

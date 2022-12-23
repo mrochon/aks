@@ -1,9 +1,15 @@
 using Microsoft.Identity.Client;
+using FileLogger;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Logging.AddFileLogger((conf) => conf.LogFilePath = "/app/log.txt" );
+File.WriteAllText("/app/log.txt", "App starting");
 
 if (File.Exists("/app/settings/appSettings.json"))
+{
+    File.AppendAllLines("/app/log.txt", new string[] { Environment.NewLine, "settinggsMap found" });
     builder.Configuration.AddJsonFile("/app/settings/appSettings.json");
+}
 
 builder.Services.AddOptions<ConfidentialClientApplicationOptions>()
     .Bind(builder.Configuration.GetSection("AzureAd"));

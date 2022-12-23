@@ -17,10 +17,10 @@ spec:
     spec:
       containers:
         - name: api-client
-          image: localhost:5000/webclientapp:v1
-          imagePullPolicy: Never          
+          image: $($IMAGE)
+          imagePullPolicy: IfNotPresent          
           ports:
-            - containerPort: 80
+            - containerPort: 8080
               protocol: TCP
           env:
             - name: ASPNETCORE_URLS
@@ -31,7 +31,7 @@ spec:
             readOnly: true
           - name: appsettings-volume
             mountPath: /app/settings                
-      serviceAccountName: client.app1
+      serviceAccountName: $($SERVICE_ACCOUNT)
       volumes:
       - name: token-vol
         projected:
@@ -43,4 +43,3 @@ spec:
       - name: appsettings-volume
         configMap:
           name: appsettings              
-

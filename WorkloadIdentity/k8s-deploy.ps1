@@ -7,10 +7,8 @@ $PROJ = "akswi"
 $RG = "$($PROJ)-rg"
 $CLUSTER_NAME = "$($PROJ)-aks"
 $ACR = "mrochonacr.azurecr.io"
-
-# Make sure you are running in the right context
-kubectl config get-contexts
-kubectl config use-context $CLUSTER_NAME
+$IMAGE = "$($ACR)/webclientapp:v1"
+$SERVICE_ACCOUNT = "client.app1"
 
 # Setup env
 # az extension add --name aks-preview
@@ -19,6 +17,10 @@ az feature register --namespace "Microsoft.ContainerService" --name "EnableWorkl
 # above can take 10-15 mins
 az feature show --namespace "Microsoft.ContainerService" --name "EnableWorkloadIdentityPreview"
 az provider register --namespace Microsoft.ContainerService
+
+# Make sure you are running in the right context
+kubectl config get-contexts
+kubectl config use-context $CLUSTER_NAME
 
 # Push a new docker image
 az acr login --name $ACR 
@@ -35,6 +37,18 @@ az aks create -g $RG -n $CLUSTER_NAME --node-count 1 --enable-oidc-issuer --loca
 az aks get-credentials --resource-group $RG --name $CLUSTER_NAME
 
 # Get username/secret from Azure ACR portal Access Keys menu. Needed because of https://github.com/Azure/AKS/issues/1517, using preview
+$SECRET_NAME = "acr_secret"
+$ACR_PWD = '...'
+kubectl create secret docker-registry $SECRET_NAME --namespace default --docker-server=mrochonacr.azurecr.io --docker-username=mrochonacr --docker-password=$ACR_PWD
+
+# The following does not work (see above)
+az aks update --name $CLUSTER_NAME --resource-group $RG --attach-acr $ACR  --debug
+
+kubectl apply -f .\configMap.yaml
+$yaml = $ExecutionContext.InvokeCommand.ExpandString((Get-Content .\serviceaccount.yaml | Out-String))
+$yaml | kubectl apply -f -
+$yaml = $ExecutionContext.InvokeCommand.ExpandString((Get-Content .\deployment.yaml | Out-String))
+$yaml | kubectl apply -f -
 
 kubectl apply -f configMap.yaml
 kubectl apply -f .\k8s-deployment.yaml
@@ -66,14 +80,3 @@ $spStr = [string]::Concat((az ad sp create --id ($app.appId)))
 # https://blog.devgenius.io/getting-started-with-workload-identity-in-aks-an-end-to-end-guide-547be742b327
 # https://stackoverflow.com/questions/74789661/how-do-i-map-a-kubectl-create-token-to-a-callable-api/74789933#74789933
 
-$IMAGE = "$($ACR)/webclientapp:v1"
-$SERVICE_ACCOUNT = "client.app1"
-
-kubectl apply -f .\configMap.yaml
-$yaml = $ExecutionContext.InvokeCommand.ExpandString((Get-Content .\serviceaccount.yaml | Out-String))
-$yaml | kubectl apply -f -
-
-kubectl apply -f k8s-deployment.yaml
-
-$yaml = $ExecutionContext.InvokeCommand.ExpandString((Get-Content .\deployment.yaml | Out-String))
-$yaml | kubectl apply -f -
