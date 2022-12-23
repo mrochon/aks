@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: client.app1
+  name: $($SERVICE_ACCOUNT)
   namespace: default
 ---
 apiVersion: apps/v1
@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
         - name: api-client
-          image: $($ACR)/webclientapp:v2
+          image: $($REPO)/webclientapp:v2
           imagePullPolicy: Always
           ports:
             - containerPort: 80

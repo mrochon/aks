@@ -6,8 +6,8 @@ $LOCATION = "WESTUS3"
 $PROJ = "akswi"
 $RG = "$($PROJ)-rg"
 $CLUSTER_NAME = "$($PROJ)-aks"
-$ACR = "mrochonacr.azurecr.io"
-$IMAGE = "$($ACR)/webclientapp:v1"
+$REPO = "mrochonacr.azurecr.io"
+$IMAGE = "$($REPO)/webclientapp:v1"
 $SERVICE_ACCOUNT = "client.app1"
 
 # Setup env
@@ -23,9 +23,9 @@ kubectl config get-contexts
 kubectl config use-context $CLUSTER_NAME
 
 # Push a new docker image
-az acr login --name $ACR 
-docker tag webclientapp:latest $ACR/webclientapp:v2
-docker push $ACR/webclientapp:v2
+az acr login --name $REPO 
+docker tag webclientapp:latest $REPO/webclientapp:v2
+docker push $REPO/webclientapp:v2
 
 # login to Azure
 az login --tenant $TENANT
@@ -38,26 +38,20 @@ az aks get-credentials --resource-group $RG --name $CLUSTER_NAME
 
 # Get username/secret from Azure ACR portal Access Keys menu. Needed because of https://github.com/Azure/AKS/issues/1517, using preview
 $SECRET_NAME = "acr_secret"
-$ACR_PWD = '...'
-kubectl create secret docker-registry $SECRET_NAME --namespace default --docker-server=mrochonacr.azurecr.io --docker-username=mrochonacr --docker-password=$ACR_PWD
+$REPO_PWD = '...'
+kubectl create secret docker-registry $SECRET_NAME --namespace default --docker-server=mrochonacr.azurecr.io --docker-username=mrochonacr --docker-password=$REPO_PWD
 
 # The following does not work (see above)
-az aks update --name $CLUSTER_NAME --resource-group $RG --attach-acr $ACR  --debug
+az aks update --name $CLUSTER_NAME --resource-group $RG --attach-acr $REPO  --debug
 
+# k8s APIs
 kubectl apply -f .\configMap.yaml
-$yaml = $ExecutionContext.InvokeCommand.ExpandString((Get-Content .\serviceaccount.yaml | Out-String))
-$yaml | kubectl apply -f -
 $yaml = $ExecutionContext.InvokeCommand.ExpandString((Get-Content .\deployment.yaml | Out-String))
 $yaml | kubectl apply -f -
 
-kubectl apply -f configMap.yaml
-kubectl apply -f .\k8s-deployment.yaml
 kubectl get pods
 kubectl get services
 # Go to EXTERNAL-IP:PORTS e.g. http://20.125.85.97:4080/
-
-# The following does not work (see above)
-az aks update --name $CLUSTER_NAME --resource-group $RG --attach-acr $ACR  --debug
 
 # Get metadata
 $AKS_OIDC_ISSUER="$(az aks show -n $CLUSTER_NAME -g $RG `
