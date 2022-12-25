@@ -12,12 +12,15 @@ kubectl get po -A
 # To point your terminal to use the docker daemon inside minikube run this
 & minikube -p minikube docker-env --shell powershell | Invoke-Expression
 
+# Use local registry
+docker run -d -p 5000:5000 --name registry registry:2
+docker image tag webclientapp:latest localhost:5000/webclientapp:v2
+docker push localhost:5000/webclientapp:v2
+docker container stop registry && docker container rm -v registry
+
 minikube image load webclientapp:latest
 minikube image list
 minikube cache delete webclientapp:v1
-
-$IMAGE = "docker.io/library/webclientapp:latest"
-$SERVICE_ACCOUNT = "client.app1"
 
 kubectl apply -f .\configMap.yaml
 $yaml = $ExecutionContext.InvokeCommand.ExpandString((Get-Content .\serviceaccount.yaml | Out-String))

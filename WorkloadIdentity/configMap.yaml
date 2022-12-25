@@ -15,7 +15,7 @@ data:
       "AllowedHosts": "*",
       "AzureAd": {
         "Instance": "https://login.microsoftonline.com",
-        "ClientId": "6f377fa5-9da4-47bc-8fca-090b4a361870",
-        "TenantId": "beitmerari.com"
+        "ClientId": "$($AAD_APP_ID)",
+        "TenantId": "$($AAD_TENANT)"
       }
     }
