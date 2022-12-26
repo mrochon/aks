@@ -67,8 +67,8 @@ kubectl get services
 
 # TBD. Incomplete!!!
 az ad sp show --id "00000003-0000-0000-c000-000000000000"
-# App registration
-$app = ConvertFrom-Json ([string]::Concat((az ad app create --display-name $($AAD_APP_NAME)))))
+# App registration - use azwi instead
+$app = ConvertFrom-Json ([string]::Concat((az ad app create --display-name $($AAD_APP_NAME))))
 $sp = ConvertFrom-Json ([string]::Concat((az ad sp create --id ($app.appId))))
 
 # 00000003-0000-0000-c000-000000000000
