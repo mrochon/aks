@@ -1,0 +1,146 @@
+# My little try
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mr-sample1
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    k8s-app: mr-sample1
+  name: mr-sample1
+  namespace: mr-sample1
+spec:
+  ports:
+    - port: 80
+      targetPort: 8080
+  selector:
+    k8s-app: mr-sample1
+  type: LoadBalancer    
+
+---
+
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  labels:
+    k8s-app: mr-sample1
+  name: mr-sample1
+  namespace: mr-sample1
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      k8s-app: mr-sample1
+  template:
+    metadata:
+      labels:
+        k8s-app: mr-sample1
+    spec:
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: mr-sample1
+          image: gcr.io/google-samples/node-hello:1.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+      volumes:
+        - name: tmp-volume
+          emptyDir: {}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: mr-sample1  
+spec:
+  selector:
+    app: hello
+    tier: frontend
+  ports:
+  - protocol: "TCP"
+    port: 80
+    targetPort: 80
+  type: LoadBalancer
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-conf
+  namespace: mr-sample1
+data:
+  nginx.conf: |
+    user nginx;
+    worker_processes  1;
+    events {
+      worker_connections  10240;
+    }
+    http {
+      # The identifier Backend is internal to nginx, and used to name this specific upstream
+      upstream Backend {
+        # hello is the internal DNS name used by the backend Service inside Kubernetes
+        server mr-sample1;
+      }    
+      server {
+        listen       80;
+        location / {
+          # The following statement will proxy traffic to the upstream named Backend
+          proxy_pass http://Backend;
+        }
+      }
+    }
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: mr-sample1  
+spec:
+  selector:
+    matchLabels:
+      app: hello
+      tier: frontend
+      track: stable
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: hello
+        tier: frontend
+        track: stable
+    spec:
+      containers:
+        - name: nginx
+          image: "gcr.io/google-samples/hello-frontend:1.0"
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/usr/sbin/nginx","-s","quit"]
+          volumeMounts:
+            - name: nginx-conf
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+              readOnly: true
+      volumes:
+      - name: nginx-conf
+        configMap:
+          name: nginx-conf
+          items:
+            - key: nginx.conf
+              path: nginx.conf
+
+...
