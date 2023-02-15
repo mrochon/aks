@@ -17,7 +17,7 @@ metadata:
 spec:
   ports:
     - port: 80
-      targetPort: 8080
+      targetPort: 80
   selector:
     k8s-app: mr-sample1
   type: LoadBalancer    
@@ -27,24 +27,15 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: nginx-back-conf
+  name: index-html-configmap
   namespace: mr-sample1
 data:
-  nginx.conf: |
-    user nginx;
-    worker_processes  1;
-    events {
-      worker_connections  10240;
-    }
-    http {
-      server {
-        listen       80;
-        location / {
-            default_type text/html;
-            return 200 '<!doctype html><html lang="en"><head></head><body>hello world!</body></html>';
-        }
-      }
-    }
+  index.html: |
+    <html>
+    <h1>Welcome</h1>
+    </br>
+    <h1>Hi! This is a configmap Index file </h1>
+    </html
 
 ---
 
@@ -71,14 +62,18 @@ spec:
           type: RuntimeDefault
       containers:
         - name: mr-sample1
-          image: gcr.io/google-samples/node-hello:1.0
+          image: nginx:latest
           imagePullPolicy: Always
           ports:
-            - containerPort: 8080
+            - containerPort: 80
               protocol: TCP
+          volumeMounts:
+            - name: nginx-index-file
+              mountPath: /usr/share/nginx/html/
       volumes:
-        - name: tmp-volume
-          emptyDir: {}
+      - name: nginx-index-file
+        configMap:
+          name: index-html-configmap
 
 ---
 
