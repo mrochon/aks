@@ -24,6 +24,30 @@ spec:
 
 ---
 
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-back-conf
+  namespace: mr-sample1
+data:
+  nginx.conf: |
+    user nginx;
+    worker_processes  1;
+    events {
+      worker_connections  10240;
+    }
+    http {
+      server {
+        listen       80;
+        location / {
+            default_type text/html;
+            return 200 '<!doctype html><html lang="en"><head></head><body>hello world!</body></html>';
+        }
+      }
+    }
+
+---
+
 kind: Deployment
 apiVersion: apps/v1
 metadata:
@@ -78,7 +102,7 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: nginx-conf
+  name: nginx-fe-conf
   namespace: mr-sample1
 data:
   nginx.conf: |
@@ -138,7 +162,7 @@ spec:
       volumes:
       - name: nginx-conf
         configMap:
-          name: nginx-conf
+          name: nginx-fe-conf
           items:
             - key: nginx.conf
               path: nginx.conf
