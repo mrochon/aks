@@ -5,5 +5,6 @@ docker push $ACR/weatherforecast:v1
 az acr repository list --name $ACR --output table
 az acr repository show-tags --name $ACR --repository weatherforecast --output table
 
+# to Docker
 docker tag weatherforecast:latest rochonm/weatherforecast:v2
 docker push rochonm/weatherforecast:v2

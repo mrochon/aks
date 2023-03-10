@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: weather-api
+  labels:
+    app: webapi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ingress-weather
+  template:
+    metadata:
+      labels:
+        app: ingress-weather
+        api: weather
+    spec:
+      containers:
+        - name: api
+          image: rochonm/weatherforecast:v2
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              protocol: TCP
+            - containerPort: 443
+              protocol: TCP              
+
