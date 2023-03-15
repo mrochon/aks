@@ -10,4 +10,7 @@ $ACR = "mrochonacr2"
 
 az login --tenant $TENANT
 
+az aks start --name $AKS --resource-group $RG
+
+
 
