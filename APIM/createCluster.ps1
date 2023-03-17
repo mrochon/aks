@@ -6,7 +6,6 @@ az aks create --node-count $NODE_COUNT `
    --node-vm-size $VM_SKU `
    --name $AKS `
    --resource-group $RG `
-   --enable-managed-identity `
    --enable-addons monitoring --enable-msi-auth-for-monitoring
 
 az aks get-credentials --name $AKS --resource-group $RG

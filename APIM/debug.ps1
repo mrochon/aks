@@ -1,5 +1,5 @@
-kubectl port-forward pod/weather-api-99c9c7fd6-t7t5n  8080:80
-kubectl port-forward service/api-svc 8080:8100
+kubectl port-forward pod/weather-api-99c9c7fd6-2v5cf  8080:80 -n app
+curl -kL http
 
 # localhost:8080/weatherforecast
 

@@ -1,13 +1,6 @@
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm repo update
 
-helm install nginx-ingress ingress-nginx/ingress-nginx `
---namespace ingress-nginx --create-namespace `
---set controller.nodeSelector."kubernetes\.io/os"=linux `
---set defaultBackend.nodeSelector."kubernetes\.io/os"=linux
-
-# per https://kubernetes.github.io/ingress-nginx/deploy/#quick-start
-
 helm upgrade --install ingress-nginx ingress-nginx `
   --repo https://kubernetes.github.io/ingress-nginx `
   --namespace ingress-nginx --create-namespace
@@ -25,3 +18,7 @@ kubectl port-forward --namespace=ingress-nginx service/ingress-nginx-controller 
 
 kubectl delete deployment demo
 kubectl delete ingress demo-localhost
+
+# https://matthewpalmer.net/kubernetes-app-developer/articles/kubernetes-ingress-guide-nginx-example.html
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/mandatory.yaml
+kubectl get pods --all-namespaces -l app=ingress-nginx
