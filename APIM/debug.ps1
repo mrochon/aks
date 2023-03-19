@@ -10,5 +10,6 @@ kubectl get service ingress-nginx-controller --namespace=ingress-nginx
 
 
 kubectl get pods --namespace ingress-nginx
-kubectl logs ingress-nginx-controller-89758f7c6-plb95 --namespace ingress-nginx
+kubectl logs ingress-nginx-controller-89758f7c6-4b8kc --namespace ingress-nginx
 
+kubectl exec -ti ingress-nginx-controller-89758f7c6-4b8kc -n ingress-nginx -- bash
