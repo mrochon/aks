@@ -17,3 +17,6 @@ az aks stop --name $AKS --resource-group $RG
 
 
 
+az config set core.allow_broker=true
+az account clear
+az login

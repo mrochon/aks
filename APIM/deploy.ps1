@@ -1,5 +1,15 @@
 kubectl get nodes
 
+cd ./apim/yaml2
+kubectl apply -f ns.yaml
+kubectl apply -f app1.yaml --namespace ingress-basic
+kubectl apply -f app2.yaml --namespace ingress-basic
+kubectl apply -f ingress.yaml --namespace ingress-basic
+
+kubectl get svc -n ingress-basic
+kubectl get ingress -n ingress-basic
+
+
 cd ./apim/yaml
 kubectl apply -f createNS.yaml
 kubectl apply -f api.yaml -n app
